@@ -10,7 +10,6 @@ const loggerMiddleware = pinoHttp({ logger });
 function setupServer() {
   const app = express();
 
-  // Middleware
   app.use(cors());
   app.use(loggerMiddleware);
   app.use(express.json());
