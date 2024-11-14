@@ -32,4 +32,4 @@ const contactsSchema = new Schema(
     versionKey: false,
   },
 );
-export const ContactsCollection = model('contacts', contactsSchema);
+export const ContactsCollection = model('contact', contactsSchema);
