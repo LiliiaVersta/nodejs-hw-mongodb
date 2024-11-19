@@ -12,18 +12,15 @@ import {
 
 const router = express.Router();
 
-// Роут для отримання всіх контактів
 router.get('/', ctrlWrapper(getAllContactsController));
 
-// Роут для отримання контакту за ID
 router.get('/:contactId', ctrlWrapper(getContactByIdController));
 
-// Роут для створення нового контакту
+// новый
 router.post('/', ctrlWrapper(createContactController));
 
-// Роут для оновлення контакту за ID
+// обновляет
 router.patch('/:contactId', ctrlWrapper(updateContactController));
 
-// Роут для видалення контакту за ID
 router.delete('/:contactId', ctrlWrapper(deleteContactController));
 export default router;

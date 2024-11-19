@@ -5,7 +5,7 @@ export const ctrlWrapper = (ctrl) => {
     try {
       await ctrl(req, res, next);
     } catch (err) {
-      next(err); // Передаємо помилку у middleware errorHandler
+      next(err);
     }
   };
 };
