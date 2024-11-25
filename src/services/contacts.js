@@ -1,9 +1,17 @@
 import { ContactsCollection } from '../db/models/contacts.js';
 
-export const getAllContacts = async () => {
-  const contacts = await ContactsCollection.find();
-  console.log('Fetched contacts from database:', contacts);
-  return contacts;
+export const getAllContacts = async (page, perPage, sortBy, sortOrder) => {
+  const skip = (page - 1) * perPage;
+
+  const [contacts, totalItems] = await Promise.all([
+    ContactsCollection.find()
+      .sort({ [sortBy]: sortOrder })
+      .skip(skip)
+      .limit(perPage),
+    ContactsCollection.countDocuments(),
+  ]);
+
+  return { contacts, totalItems };
 };
 export const getContactById = async (contactId) => {
   return await ContactsCollection.findById(contactId);

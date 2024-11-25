@@ -9,17 +9,45 @@ import createError from 'http-errors';
 
 export const getAllContactsController = async (req, res, next) => {
   try {
-    const contacts = await getAllContacts();
+    const {
+      page = 1,
+      perPage = 10,
+      sortBy = 'name',
+      sortOrder = 'asc',
+    } = req.query;
+
+    const pageNumber = parseInt(page, 10);
+    const perPageNumber = parseInt(perPage, 10);
+    const order = sortOrder === 'desc' ? -1 : 1;
+
+    const { contacts, totalItems } = await getAllContacts(
+      pageNumber,
+      perPageNumber,
+      sortBy,
+      order,
+    );
+
+    const totalPages = Math.ceil(totalItems / perPageNumber);
+    const hasPreviousPage = pageNumber > 1;
+    const hasNextPage = pageNumber < totalPages;
+
     res.status(200).json({
       status: 200,
       message: 'Successfully found contacts!',
-      data: contacts,
+      data: {
+        data: contacts,
+        page: pageNumber,
+        perPage: perPageNumber,
+        totalItems,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
+      },
     });
   } catch (err) {
     next(err);
   }
 };
-
 export const getContactByIdController = async (req, res, next) => {
   try {
     const { contactId } = req.params;
