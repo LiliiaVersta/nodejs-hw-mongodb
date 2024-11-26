@@ -9,35 +9,34 @@ import createError from 'http-errors';
 
 export const getAllContactsController = async (req, res, next) => {
   try {
-    const {
-      page = 1,
-      perPage = 10,
-      sortBy = 'name',
-      sortOrder = 'asc',
-    } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = parseInt(req.query.perPage, 10) || 10;
 
-    const pageNumber = parseInt(page, 10);
-    const perPageNumber = parseInt(perPage, 10);
-    const order = sortOrder === 'desc' ? -1 : 1;
+    const validSortByFields = ['name', 'email', 'phoneNumber'];
+    const sortBy = validSortByFields.includes(req.query.sortBy)
+      ? req.query.sortBy
+      : 'name';
+
+    const sortOrder = req.query.sortOrder === 'desc' ? -1 : 1;
 
     const { contacts, totalItems } = await getAllContacts(
-      pageNumber,
-      perPageNumber,
+      page,
+      perPage,
       sortBy,
-      order,
+      sortOrder,
     );
 
-    const totalPages = Math.ceil(totalItems / perPageNumber);
-    const hasPreviousPage = pageNumber > 1;
-    const hasNextPage = pageNumber < totalPages;
+    const totalPages = Math.ceil(totalItems / perPage);
+    const hasPreviousPage = page > 1;
+    const hasNextPage = page < totalPages;
 
     res.status(200).json({
       status: 200,
       message: 'Successfully found contacts!',
       data: {
         data: contacts,
-        page: pageNumber,
-        perPage: perPageNumber,
+        page,
+        perPage,
         totalItems,
         totalPages,
         hasPreviousPage,
