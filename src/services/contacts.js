@@ -1,20 +1,12 @@
 import { ContactsCollection } from '../db/models/contacts.js';
 
-export const getAllContacts = async (page, perPage, sortBy, sortOrder) => {
-  const skip = (page - 1) * perPage;
-
-  const [contacts, totalItems] = await Promise.all([
-    ContactsCollection.find()
-      .sort({ [sortBy]: sortOrder })
-      .skip(skip)
-      .limit(perPage),
-    ContactsCollection.countDocuments(),
-  ]);
-
-  return { contacts, totalItems };
+export const getAllContacts = async (userId, sortBy, sortOrder) => {
+  return await ContactsCollection.find({ userId }).sort({
+    [sortBy]: sortOrder,
+  });
 };
-export const getContactById = async (contactId) => {
-  return await ContactsCollection.findById(contactId);
+export const getContactById = async (contactId, userId) => {
+  return await ContactsCollection.findOne({ _id: contactId, userId });
 };
 
 export const createContact = async (contactData) => {
@@ -22,16 +14,19 @@ export const createContact = async (contactData) => {
   return newContact;
 };
 
-export const updateContact = async (contactId, updateFields) => {
+export const updateContact = async (contactId, updateFields, userId) => {
   const updatedContact = await ContactsCollection.findByIdAndUpdate(
-    contactId,
+    { _id: contactId, userId },
     updateFields,
     { new: true, runValidators: true },
   );
   return updatedContact;
 };
 
-export const deleteContact = async (contactId) => {
-  const result = await ContactsCollection.findByIdAndDelete(contactId);
+export const deleteContact = async (contactId, userId) => {
+  const result = await ContactsCollection.findByIdAndDelete({
+    _id: contactId,
+    userId,
+  });
   return result;
 };
