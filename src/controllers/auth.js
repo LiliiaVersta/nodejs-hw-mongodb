@@ -24,23 +24,35 @@ export const registerController = async (req, res, next) => {
   }
 };
 
+// **Логін**
 export const loginController = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const session = await loginUser(req.body);
 
-    const { accessToken, refreshToken } = await loginUser({ email, password });
+    if (!session || !session.sessionId) {
+      return res.status(500).json({
+        status: 500,
+        message: 'Failed to create session',
+      });
+    }
 
-    res.cookie('refreshToken', refreshToken, {
+    // Записуємо refreshToken та sessionId у cookies
+    res.cookie('refreshToken', session.refreshToken, {
       httpOnly: true,
-      secure: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
+      secure: false,
+      expires: new Date(Date.now() + THIRTY_DAYS),
+    });
+    res.cookie('sessionId', session.sessionId, {
+      httpOnly: true,
+      secure: false,
+      expires: new Date(Date.now() + THIRTY_DAYS),
     });
 
     res.status(200).json({
       status: 200,
-      message: 'Successfully logged in an user!',
+      message: 'Successfully logged in a user!',
       data: {
-        accessToken,
+        accessToken: session.accessToken,
       },
     });
   } catch (error) {
@@ -48,9 +60,11 @@ export const loginController = async (req, res, next) => {
   }
 };
 
+// **Оновлення сесії**
 export const refreshSessionController = async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
+
     if (!refreshToken) {
       return res.status(401).json({
         status: 401,
@@ -62,10 +76,12 @@ export const refreshSessionController = async (req, res, next) => {
 
     res.cookie('refreshToken', session.refreshToken, {
       httpOnly: true,
+      secure: false,
       expires: new Date(Date.now() + THIRTY_DAYS),
     });
-    res.cookie('sessionId', session._id, {
+    res.cookie('sessionId', session.sessionId, {
       httpOnly: true,
+      secure: false,
       expires: new Date(Date.now() + THIRTY_DAYS),
     });
 
@@ -86,12 +102,16 @@ export const logoutController = async (req, res, next) => {
     const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
-      throw new Error('Refresh token is required');
+      return res.status(401).json({
+        status: 401,
+        message: 'Refresh token is required',
+      });
     }
 
     await logoutUser(refreshToken);
 
-    res.clearCookie('refreshToken', { httpOnly: true, secure: true });
+    res.clearCookie('refreshToken', { httpOnly: true, secure: false });
+    res.clearCookie('sessionId', { httpOnly: true, secure: false });
 
     res.status(204).send();
   } catch (error) {
