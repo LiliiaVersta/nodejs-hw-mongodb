@@ -1,7 +1,11 @@
-import { registerUser } from '../services/auth.js';
-import { loginUser } from '../services/auth.js';
-import { refreshSession } from '../services/auth.js';
-import { logoutUser } from '../services/auth.js';
+import {
+  registerUser,
+  refreshSession,
+  loginUser,
+  logoutUser,
+  requestResetToken,
+  resetPassword,
+} from '../services/auth.js';
 import { THIRTY_DAYS } from '../constants/index.js';
 
 export const registerController = async (req, res, next) => {
@@ -116,5 +120,39 @@ export const logoutController = async (req, res, next) => {
     res.status(204).send();
   } catch (error) {
     next(error);
+  }
+};
+
+export const requestResetEmailController = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    // Вызов сервиса для отправки письма со ссылкой на сброс пароля
+    await requestResetToken(email);
+
+    res.status(200).json({
+      status: 200,
+      message: 'Reset password email has been successfully sent.',
+      data: {},
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const resetPasswordController = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+
+    // Вызов сервиса для сброса пароля
+    await resetPassword(token, password);
+
+    res.status(200).json({
+      status: 200,
+      message: 'Password has been successfully reset.',
+      data: {},
+    });
+  } catch (err) {
+    next(err);
   }
 };

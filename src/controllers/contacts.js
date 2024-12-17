@@ -7,6 +7,7 @@ import {
 } from '../services/contacts.js';
 
 import createHttpError from 'http-errors';
+import cloudinary from '../utils/cloudinary.js';
 
 export const getAllContactsController = async (req, res, next) => {
   try {
@@ -62,16 +63,31 @@ export const getContactByIdController = async (req, res, next) => {
   }
 };
 
+const uploadPhotoToCloudinary = async (file) => {
+  if (!file) return null;
+  const result = await cloudinary.uploader
+    .upload_stream({ resource_type: 'auto' }, (error, result) => {
+      if (error) throw createHttpError(500, 'Failed to upload photo');
+      return result.secure_url;
+    })
+    .end(file.buffer);
+  return result;
+};
+
 export const createContactController = async (req, res, next) => {
   try {
-    if (!Object.keys(req.body).length) {
-      throw createHttpError(400, 'Request body cannot be empty');
-    }
     const contactData = {
       ...req.body,
       userId: req.user._id,
     };
 
+    // Обработка фото
+    if (req.file) {
+      contactData.photo = await uploadPhotoToCloudinary(req.file);
+    }
+    if (!Object.keys(req.body).length) {
+      throw createHttpError(400, 'Request body cannot be empty');
+    }
     const newContact = await createContact(contactData);
     res.status(201).json({
       status: 201,
@@ -87,6 +103,11 @@ export const updateContactController = async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const updateFields = req.body;
+
+    // Обновление фото
+    if (req.file) {
+      updateFields.photo = await uploadPhotoToCloudinary(req.file);
+    }
     const updatedContact = await updateContact(
       req.user._id,
       contactId,
