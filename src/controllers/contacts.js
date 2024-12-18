@@ -7,7 +7,9 @@ import {
 } from '../services/contacts.js';
 
 import createHttpError from 'http-errors';
-import cloudinary from '../utils/cloudinary.js';
+// import cloudinary from '../utils/cloudinary.js';
+
+import { uploadPhotoToCloudinary } from '../utils/uploadPhoto.js';
 
 export const getAllContactsController = async (req, res, next) => {
   try {
@@ -63,37 +65,39 @@ export const getContactByIdController = async (req, res, next) => {
   }
 };
 
-const uploadPhotoToCloudinary = async (file) => {
-  if (!file) return null;
-  const result = await cloudinary.uploader
-    .upload_stream({ resource_type: 'auto' }, (error, result) => {
-      if (error) throw createHttpError(500, 'Failed to upload photo');
-      return result.secure_url;
-    })
-    .end(file.buffer);
-  return result;
-};
+// export const uploadPhotoToCloudinary = async (file) => {
+//   if (!file) return null;
+//   const result = await cloudinary.uploader
+//     .upload_stream({ resource_type: 'auto' }, (error, result) => {
+//       if (error) throw createHttpError(500, 'Failed to upload photo');
+//       return result.secure_url;
+//     })
+//     .end(file.buffer);
+//   return result;
+// };
 
 export const createContactController = async (req, res, next) => {
   try {
+    if (!Object.keys(req.body).length) {
+      throw createHttpError(400, 'Request body cannot be empty');
+    }
     const contactData = {
       ...req.body,
       userId: req.user._id,
     };
 
-    // Обработка фото
+    // Загрузка фото в Cloudinary
     if (req.file) {
-      contactData.photo = await uploadPhotoToCloudinary(req.file);
+      const photoUrl = await uploadPhotoToCloudinary(req.file);
+      contactData.photo = photoUrl;
+
+      const newContact = await createContact(contactData);
+      res.status(201).json({
+        status: 201,
+        message: 'Successfully created a contact!',
+        data: newContact,
+      });
     }
-    if (!Object.keys(req.body).length) {
-      throw createHttpError(400, 'Request body cannot be empty');
-    }
-    const newContact = await createContact(contactData);
-    res.status(201).json({
-      status: 201,
-      message: 'Successfully created a contact!',
-      data: newContact,
-    });
   } catch (err) {
     next(err);
   }
@@ -104,9 +108,10 @@ export const updateContactController = async (req, res, next) => {
     const { contactId } = req.params;
     const updateFields = req.body;
 
-    // Обновление фото
+    // Загрузка нового фото в Cloudinary
     if (req.file) {
-      updateFields.photo = await uploadPhotoToCloudinary(req.file);
+      const photoUrl = await uploadPhotoToCloudinary(req.file);
+      updateFields.photo = photoUrl;
     }
     const updatedContact = await updateContact(
       req.user._id,
