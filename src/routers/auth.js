@@ -31,12 +31,12 @@ router.post('/logout', ctrlWrapper(logoutController));
 
 router.post(
   '/send-reset-email',
-  validateBody(authValidation),
+  validateBody(authValidation.resetEmail),
   ctrlWrapper(requestResetEmailController),
 );
 router.post(
   '/auth/reset-pwd',
   validateBody(authValidation.resetPassword),
-  resetPasswordController,
+  ctrlWrapper(resetPasswordController),
 );
 export default router;
