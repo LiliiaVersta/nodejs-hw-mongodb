@@ -9,6 +9,8 @@ import authRouter from './routers/auth.js';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
+// import swaggerRouter from './routers/swagger.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 const logger = pino();
 const loggerMiddleware = pinoHttp({ logger });
@@ -27,6 +29,8 @@ function setupServer() {
   app.use('/contacts', contactsRouter);
 
   app.use('/auth', authRouter);
+
+  app.use('/', swaggerDocs);
 
   app.use(notFoundHandler);
 
