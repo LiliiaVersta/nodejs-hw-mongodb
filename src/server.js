@@ -30,7 +30,7 @@ function setupServer() {
 
   app.use('/auth', authRouter);
 
-  app.use('/', swaggerDocs);
+  app.use('/api-docs', ...swaggerDocs());
 
   app.use(notFoundHandler);
 
