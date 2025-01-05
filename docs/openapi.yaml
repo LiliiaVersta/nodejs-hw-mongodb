@@ -13,7 +13,7 @@ tags:
     description: Операции с контактами
 servers:
   - url: http://localhost:3000
-  - url: https://nodejs-hw-mongodb-13-aumm.onrender.com
+  - url: https://nodejs-hw-mongodb-14-fb3s.onrender.com
 components:
   securitySchemes:
     bearerAuth:

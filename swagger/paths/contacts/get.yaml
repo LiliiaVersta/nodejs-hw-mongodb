@@ -2,32 +2,82 @@ tags:
   - Contacts
 summary: Get all contacts
 operationId: getAllContacts
-description: Retrieve all contacts for the authenticated user.
+description: Retrieve list of contacts for the authenticated user
 security:
   - bearerAuth: []
 parameters:
-  - name: page
-    in: query
+  - in: query
+    name: page
+    schema:
+      type: integer
     required: false
     description: Page number for pagination
+    example: 1
+  - in: query
+    name: perPage
     schema:
       type: integer
-      default: 1
-  - name: perPage
-    in: query
     required: false
     description: Number of contacts per page
+    example: 10
+  - in: query
+    name: sortBy
     schema:
-      type: integer
-      default: 10
+      type: string
+    required: false
+    description: Field to sort contacts by. Default is 'name'
+    example: name
+  - in: query
+    name: sortOrder
+    schema:
+      type: string
+      enum:
+        - asc
+        - desc
+    required: false
+    description: "Sort order: 'asc' for ascending, 'desc' for descending. Default is 'asc'."
+    example: asc
 responses:
   '200':
-    description: Успешный ответ
+    description: Successfully retrieved contacts
     content:
       application/json:
         schema:
-          type: array
-          items:
-            $ref: ../../components/schemas/Contact.yaml
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: Successfully retrieved contacts!
+            data:
+              type: object
+              properties:
+                contacts:
+                  type: array
+                  items:
+                    $ref: ../../components/schemas/Contact.yaml
+                pagination:
+                  type: object
+                  properties:
+                    page:
+                      type: integer
+                      example: 1
+                    perPage:
+                      type: integer
+                      example: 10
+                    totalItems:
+                      type: integer
+                      example: 100
+                    totalPages:
+                      type: integer
+                      example: 10
+                    hasPreviousPage:
+                      type: boolean
+                      example: false
+                    hasNextPage:
+                      type: boolean
+                      example: true
   '401':
-    description: Неавторизованный доступ
+    description: Unauthorized

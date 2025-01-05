@@ -1,12 +1,39 @@
 type: object
+required:
+  - name
+  - phoneNumber
+  - contactType
 properties:
   id:
     type: string
+    example: '6479e2f1e13e5c42c9d50ef3'
   name:
     type: string
+    description: Full name of the contact
+    minLength: 3
+    maxLength: 20
+    example: John Doe
   phoneNumber:
     type: string
+    description: Contact's phone number
+    minLength: 3
+    maxLength: 20
+    example: '+123456789'
   email:
     type: string
+    description: Contact's email (optional)
+    format: email
+    example: john.doe@example.com
+  isFavourite:
+    type: boolean
+    description: Mark the contact as favourite (optional)
+    example: false
+  contactType:
+    type: string
+    description: Type of contact
+    enum: [work, home, personal]
+    example: personal
   photo:
     type: string
+    description: URL or binary string of the contact's profile photo (optional)
+    example: 'https://example.com/photo.jpg'
