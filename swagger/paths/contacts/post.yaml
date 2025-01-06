@@ -2,15 +2,42 @@ tags:
   - Contacts
 summary: Create a new contact
 operationId: createContact
-description: Create a new contact in the system
+description: Create a new contact in the system, including a profile photo if provided
 security:
   - bearerAuth: []
 requestBody:
   required: true
   content:
-    application/json:
+    multipart/form-data:
       schema:
-        $ref: ../../components/schemas/Contact.yaml
+        type: object
+        properties:
+          name:
+            type: string
+            description: Full name of the contact
+            example: John Doe
+          phoneNumber:
+            type: string
+            description: Phone number of the contact
+            example: '+123456789'
+          email:
+            type: string
+            description: Email of the contact (optional)
+            format: email
+            example: john.doe@example.com
+          isFavourite:
+            type: boolean
+            description: Mark the contact as favourite (optional)
+            example: false
+          contactType:
+            type: string
+            description: Type of contact
+            enum: [work, home, personal]
+            example: work
+          photo:
+            type: string
+            format: binary
+            description: Profile photo of the contact (optional)
 responses:
   '201':
     description: Successfully created the contact

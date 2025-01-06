@@ -15,9 +15,39 @@ parameters:
 requestBody:
   required: true
   content:
-    application/json:
+    multipart/form-data:
       schema:
-        $ref: ../../../components/schemas/Contact.yaml
+        type: object
+        properties:
+          name:
+            type: string
+            description: Updated name of the contact
+            example: Jane Doe
+          phoneNumber:
+            type: string
+            description: Updated phone number of the contact
+            example: '+987654321'
+          email:
+            type: string
+            description: Updated email of the contact (optional)
+            format: email
+            example: jane.doe@example.com
+          isFavourite:
+            type: boolean
+            description: Mark the contact as favourite (optional)
+            example: false
+          contactType:
+            type: string
+            description: Updated type of the contact
+            enum: [work, home, personal]
+            example: work
+          photo:
+            type: string
+            format: binary
+            description: Updated profile photo of the contact (optional)
+      encoding:
+        photo:
+          contentType: image/jpeg
 responses:
   '200':
     description: Successfully updated the contact
@@ -42,3 +72,14 @@ responses:
     description: Unauthorized
   '404':
     description: Contact not found
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 404
+            message:
+              type: string
+              example: Contact not found
